@@ -1,0 +1,5 @@
+[package]
+
+name = "rule110"
+version = "0.0.1"
+authors = [ "Brian Jewkes <github.com/bdjewkes>" ]
