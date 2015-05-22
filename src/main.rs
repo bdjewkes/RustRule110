@@ -1,75 +1,64 @@
-use std::io;
+use std::thread;
 
 fn main(){
-	println!("Rule 110.");
+	let generations = 250;
+	//if the board is too wide for your console, decrease the board width.
+	let board_width = 150;
 
-	println!("How many generations would you like to run?");
+	println!("Rule 110 implemented in Rust.");
+	println!("If the board is too wide for your console, it can be shortened by setting board_width.");
 
-	let gens = take_num_input();
-
-	println!("How wide would you like each line to be?");
-	
-	let width = take_num_input();	
-
-
-	println!("Running {} generations with a line width of {}", gens, width);
-
-	generate_ca(gens, width);
+	generate_ca(generations, board_width);
+	println!("<--------------------FIN-------------------->");
 }
 
-fn take_num_input() -> u32
-{
-	let mut usr_input = String::new();
-	io::stdin().read_line(&mut usr_input)
-		.ok()
-		.expect("Failed to read line.");
-
-	let usr_input: u32 = usr_input.trim().parse()
-            .ok()
-            .expect("Please type a number!");
-
-    usr_input        
-}
-
-fn generate_ca(gens: u32, width: u32){
-	let ruleset = [0,1,1,0,1,1,1,0];
-	let mut cells = [1, 0, 1, 1, 0, 1, 1, 1, 0, 1];
-	let mut next_cells = [0; 10];
+fn generate_ca(gens: i32, width: usize){
+	let ruleset = [0,1,1,1,0,1,1,0];
+	let mut cells = [0; 150];
+	let mut next_cells = [0; 150];
 	
+	cells[width-1] = 1;
+
 	let mut current_gen = 0;
-	let mut current_width = 0;
+
+	let alive = "░";
+	let dead = "█";
+
+	//print the first generation
+	for x in 1..width-1{
+		if cells[x] == 1{
+			print!("{}", alive)
+		}
+		else { print!("{}", dead)}
+	}
+	println!("");
 
 	while current_gen < gens {
-		
-		for x in 1..cells.len()-1 {
+		current_gen+=1;
+		for x in 1..width-1{
 		
 			let left_cell = cells[x-1];
 			let current_cell = cells[x];
 			let right_cell = cells[x+1];
-			
+				
 			let i = rules(left_cell, current_cell, right_cell);
 			next_cells[x] = ruleset[i as usize];
-			
+				
 			if ruleset[i as usize] == 1{
-				print!("█");
+				print!("{}", alive);
 			}
-			else{ print!("░",); }
+			else{ print!("{}", dead); }
 
-			current_width+= 1;
-
-			if current_width >= width  {
-				println!("");
-				current_width = 0;
-			}
 		}
-		cells = next_cells;
-		current_gen+=1;
+		cells = next_cells;		
+		println!("");
+		thread::sleep_ms(50);
 	}
 }
 
 fn rules(left: i32, current: i32, right: i32) -> u8 {
 	let s = left.to_string() + &current.to_string() + &right.to_string();
-	let x = u8::from_str_radix(&s, 2);
-	return x.unwrap();
+	let x = u8::from_str_radix(&s, 2).unwrap();
+	return x;
 }
 
