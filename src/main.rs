@@ -1,5 +1,4 @@
 use std::io;
-use std::u8;
 
 fn main(){
 	println!("Rule 110.");
@@ -39,19 +38,25 @@ fn generate_ca(gens: u32, width: u32){
 	
 	let mut current_gen = 0;
 	let mut current_width = 0;
+
 	while current_gen < gens {
+		
 		for x in 1..cells.len()-1 {
-
+		
 			let left_cell = cells[x-1];
-			
 			let current_cell = cells[x];
-
 			let right_cell = cells[x+1];
 			
 			let i = rules(left_cell, current_cell, right_cell);
 			next_cells[x] = ruleset[i as usize];
-			print!("{}", ruleset[i as usize]);
+			
+			if ruleset[i as usize] == 1{
+				print!("█");
+			}
+			else{ print!("░",); }
+
 			current_width+= 1;
+
 			if current_width >= width  {
 				println!("");
 				current_width = 0;
