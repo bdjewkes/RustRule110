@@ -1,16 +1,50 @@
 use std::thread;
+use std::io;
 
 fn main(){
 	let generations = 250;
 	//if the board is too wide for your console, decrease the board width.
-	let board_width = 150;
-
 	println!("Rule 110 implemented in Rust.");
-	println!("If the board is too wide for your console, it can be shortened by setting board_width.");
-
-	generate_ca(generations, board_width);
+	
+	let width = read_width(false);
+	generate_ca(read_generations(false), width);
 	println!("<--------------------FIN-------------------->");
 }
+
+fn read_width(error: bool) -> usize{
+	if error {
+		println!("Invalid entry. Please specify your board with.");
+	} else {
+		println!("Please specify your board witdth");
+	}
+	let mut width = String::new();
+	io::stdin().read_line(&mut width)
+			   .expect("Failed to read line");
+
+	match width.trim().parse::<usize>() {
+ 		Ok(n) => return n,	
+ 		Err(n) => return read_width(true),
+ 	}	
+}
+
+fn read_generations(error: bool) -> i32
+{
+	if error {
+		println!("Invalid entry. Please specify how many generations to run");
+	} else {
+		println!("Please specify how many generations to run");
+	}
+	let mut gen = String::new();
+
+	io::stdin().read_line(&mut gen)
+			   .expect("Failed to read line");
+	match gen.trim().parse::<i32>() {
+ 		Ok(n) => return n,	
+ 		Err(n) => read_generations(true),
+  	}
+}
+
+
 
 fn generate_ca(gens: i32, width: usize){
 	let ruleset = [0,1,1,1,0,1,1,0];
