@@ -1,13 +1,38 @@
 use std::thread;
 use std::io;
+use std::time::Duration;
+use std::collections::HashMap;
 
+
+/*
+
+
+*/
 fn main(){
-	let generations = 250;
-	//if the board is too wide for your console, decrease the board width.
-	println!("Rule 110 implemented in Rust.");
+	let mut rules: HashMap<u8, [bool; 8]> = HashMap::new();
+	rules.insert(30,  [false,false,false,true,true,true,true,false]);
+	rules.insert(54,  [false,false,true,true,false,true,true,false]);
+	rules.insert(60,  [false,false,true,true,true,true,false,false]);
+	rules.insert(62,  [false,false,true,true,true,true,true,false]);
+	rules.insert(90,  [false,true,false,true,true,false,true,false]);
+	rules.insert(94,  [false,true,false,true,true,true,true,false]);
+	rules.insert(102, [false,true,true,false,false,true,true,false]);
+	rules.insert(110, [false,true,true,false,true,true,true,false]);
+	rules.insert(122, [false,true,true,true,true,false,true,false]);
+	rules.insert(126, [false,true,true,true,true,true,true,false]);
+	rules.insert(150, [true,false,false,true,false,true,true,false]);
+	rules.insert(182, [true,false,true,true,false,true,true,false]);
+	rules.insert(188, [true,false,true,true,true,true,false,false]);
+	rules.insert(190, [true,false,true,true,true,true,true,false]);
+	rules.insert(220, [true,true,false,true,true,true,false,false]);
+	rules.insert(222, [true,true,false,true,true,true,true,false]);
+	rules.insert(250, [true,true,true,true,true,false,true,false]);
+	
 	
 	let width = read_width(false);
-	generate_ca(read_generations(false), width);
+	let rule_key = select_rule(false);
+	let rule = rules.get(&rule_key).unwrap();
+	generate_ca(rule, read_generations(false), width);
 	println!("<--------------------FIN-------------------->");
 }
 
@@ -23,7 +48,22 @@ fn read_width(error: bool) -> u8{
 
 	match width.trim().parse::<u8>() {
  		Ok(n) => return n,	
- 		Err(n) => return read_width(true),
+ 		Err(_) => return read_width(true),
+ 	}	
+}
+fn select_rule(error: bool) -> u8{
+	if error {
+		println!("Invalid entry. Please select your rule.");
+	} else {
+		println!("Please select a rule.");
+	}
+	let mut rule = String::new();
+	io::stdin().read_line(&mut rule)
+			   .expect("Failed to read line");
+
+	match rule.trim().parse::<u8>() {
+ 		Ok(n) => return n,	
+ 		Err(_) => return select_rule(true),
  	}	
 }
 
@@ -40,20 +80,18 @@ fn read_generations(error: bool) -> u32
 			   .expect("Failed to read line");
 	match gen.trim().parse::<u32>() {
  		Ok(n) => return n,	
- 		Err(n) => read_generations(true),
+ 		Err(_) => read_generations(true),
   	}
 }
 
 
 
-fn generate_ca(gens: u32, board_width: u8){
-	let ruleset = [false,true,true,true,false,true,true,false];
-
+fn generate_ca(rules: &[bool; 8], gens: u32, board_width: u8){
 	let width = board_width as usize;
 	let mut cells = [false; 256];
 	let mut next_cells = [false; 256];
 
-	cells[width - 2] = true;
+	cells[width -1] = true;
 
 	let mut current_gen = 0;
 
@@ -64,21 +102,23 @@ fn generate_ca(gens: u32, board_width: u8){
 		for x in 1..width - 1 {
 		
 			let left_cell = cells[x - 1];
-			let current_cell = cells[x];
+			let center_cell = cells[x];
 			let right_cell = cells[x + 1];
 			
-			next_cells[x] = ruleset[get_rule_index(
-					left_cell, current_cell, right_cell) 
+			next_cells[x] = rules[get_rule_index(
+					left_cell, center_cell, right_cell) 
 					as usize];
 		}
 		cells = next_cells;	
 		write_generation(next_cells, width);
-		thread::sleep_ms(50);
+
+		let sleep_duration = Duration::from_millis(30);
+		thread::sleep(sleep_duration);
 	}
 }
 
-fn get_rule_index(left: bool, current: bool, right: bool) -> u8 {
-	let prev_gen = (left, current, right);
+fn get_rule_index(left: bool, center: bool, right: bool) -> u8 {
+	let prev_gen = (left, center, right);
 	match prev_gen
 	{
 		(true, true, true) => return 0,
