@@ -4,10 +4,6 @@ use std::time::Duration;
 use std::collections::HashMap;
 
 
-/*
-
-
-*/
 fn main(){
 	let mut rules: HashMap<u8, [bool; 8]> = HashMap::new();
 	rules.insert(30,  [false,false,false,true,true,true,true,false]);
@@ -91,16 +87,19 @@ fn generate_ca(rules: &[bool; 8], gens: u32, board_width: u8){
 	let mut cells = [false; 256];
 	let mut next_cells = [false; 256];
 
-	cells[width -1] = true;
+	cells[width/2] = true;
 
 	let mut current_gen = 0;
 
-	write_generation(cells, width);
+	for x in 1..width
+	{
+		write_cell(cells[x]);
+	}
+	println!("");
 
 	while current_gen < gens {
 		current_gen+=1;
-		for x in 1..width - 1 {
-		
+		for x in 1..width {
 			let left_cell = cells[x - 1];
 			let center_cell = cells[x];
 			let right_cell = cells[x + 1];
@@ -108,9 +107,10 @@ fn generate_ca(rules: &[bool; 8], gens: u32, board_width: u8){
 			next_cells[x] = rules[get_rule_index(
 					left_cell, center_cell, right_cell) 
 					as usize];
+			write_cell(next_cells[x]);
 		}
+		println!("");
 		cells = next_cells;	
-		write_generation(next_cells, width);
 
 		let sleep_duration = Duration::from_millis(30);
 		thread::sleep(sleep_duration);
@@ -124,26 +124,23 @@ fn get_rule_index(left: bool, center: bool, right: bool) -> u8 {
 		(true, true, true) => return 0,
 		(true, true, false) => return 1,
 		(true, false, true) => return 2,
-		(false, true, true) => return 3,
-		(true, false, false) => return 4,
+		(true, false, false) => return 3,
+		(false, true, true) => return 4,
 		(false, true, false) => return 5,
 		(false, false, true) => return 6,
 		(false, false, false) => return 7
 	}
 }
 
-fn write_generation(cells: [bool; 256], width: usize)
+fn write_cell(alive: bool)
 {
-	let alive = "|";
-	let dead = " ";
-	//leave a buffer cell on either bound of the array
-	//the borders of the 'board' should always be 'dead's
-	for x in 1..width - 1{
-		if cells[x]{
-			print!("{}", alive)
-		}
-		else { print!("{}", dead)}
+	let alive_char = "|";
+	let dead_char = " ";
+	if alive{
+		print!("{}", alive_char)
+	}	
+	else { 
+		print!("{}", dead_char)
 	}
-	println!("");
 }
 
