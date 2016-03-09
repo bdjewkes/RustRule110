@@ -4,83 +4,38 @@ use std::time::Duration;
 use std::collections::HashMap;
 
 
+
 fn main(){
-	let mut rules: HashMap<u8, [bool; 8]> = HashMap::new();
-	rules.insert(30,  [false,false,false,true,true,true,true,false]);
-	rules.insert(54,  [false,false,true,true,false,true,true,false]);
-	rules.insert(60,  [false,false,true,true,true,true,false,false]);
-	rules.insert(62,  [false,false,true,true,true,true,true,false]);
-	rules.insert(90,  [false,true,false,true,true,false,true,false]);
-	rules.insert(94,  [false,true,false,true,true,true,true,false]);
-	rules.insert(102, [false,true,true,false,false,true,true,false]);
-	rules.insert(110, [false,true,true,false,true,true,true,false]);
-	rules.insert(122, [false,true,true,true,true,false,true,false]);
-	rules.insert(126, [false,true,true,true,true,true,true,false]);
-	rules.insert(150, [true,false,false,true,false,true,true,false]);
-	rules.insert(182, [true,false,true,true,false,true,true,false]);
-	rules.insert(188, [true,false,true,true,true,true,false,false]);
-	rules.insert(190, [true,false,true,true,true,true,true,false]);
-	rules.insert(220, [true,true,false,true,true,true,false,false]);
-	rules.insert(222, [true,true,false,true,true,true,true,false]);
-	rules.insert(250, [true,true,true,true,true,false,true,false]);
+	let rules = get_rules();
 	
-	
+	//print out all of the defined rules
+	println!("The following elementary cellular automata rules are available:");
+	let mut count = 0;
+	for i in rules.keys(){
+		if count%6 ==0 { println!(""); }
+		print!("{} ", i);
+		count+=1;
+	}
+	println!(""); println!("");
+
+	// Let the user provide input on which rule to simulate,
+	// and repeat until a valid rule has been selected.
+	let mut rule_key = select_rule(false);
+	while !rules.contains_key(&rule_key)
+	{
+ 		rule_key = select_rule(true)
+	}
+ 	let rule = rules.get(&rule_key).unwrap();	
+ 	print!("Rule {} selected. ", rule_key);
+	// Gets the board width by user input
 	let width = read_width(false);
-	let rule_key = select_rule(false);
-	let rule = rules.get(&rule_key).unwrap();
+	print!("Board width of {} specified. ", width);
+
+	// Get the number of generations to run by user input
+	// and then run the rule with the given parameters
 	generate_ca(rule, read_generations(false), width);
 	println!("<--------------------FIN-------------------->");
 }
-
-fn read_width(error: bool) -> u8{
-	if error {
-		println!("Invalid entry. Please specify your board with.");
-	} else {
-		println!("Please specify your board witdth");
-	}
-	let mut width = String::new();
-	io::stdin().read_line(&mut width)
-			   .expect("Failed to read line");
-
-	match width.trim().parse::<u8>() {
- 		Ok(n) => return n,	
- 		Err(_) => return read_width(true),
- 	}	
-}
-fn select_rule(error: bool) -> u8{
-	if error {
-		println!("Invalid entry. Please select your rule.");
-	} else {
-		println!("Please select a rule.");
-	}
-	let mut rule = String::new();
-	io::stdin().read_line(&mut rule)
-			   .expect("Failed to read line");
-
-	match rule.trim().parse::<u8>() {
- 		Ok(n) => return n,	
- 		Err(_) => return select_rule(true),
- 	}	
-}
-
-fn read_generations(error: bool) -> u32
-{
-	if error {
-		println!("Invalid entry. Please specify how many generations to run");
-	} else {
-		println!("Please specify how many generations to run");
-	}
-	let mut gen = String::new();
-
-	io::stdin().read_line(&mut gen)
-			   .expect("Failed to read line");
-	match gen.trim().parse::<u32>() {
- 		Ok(n) => return n,	
- 		Err(_) => read_generations(true),
-  	}
-}
-
-
 
 fn generate_ca(rules: &[bool; 8], gens: u32, board_width: u8){
 	let width = board_width as usize;
@@ -144,3 +99,73 @@ fn write_cell(alive: bool)
 	}
 }
 
+fn get_rules() -> HashMap<u8, [bool; 8]> 
+{
+	let mut rules: HashMap<u8, [bool; 8]> = HashMap::new();
+	rules.insert(30,  [false,false,false,true,true,true,true,false]);
+	rules.insert(54,  [false,false,true,true,false,true,true,false]);
+	rules.insert(60,  [false,false,true,true,true,true,false,false]);
+	rules.insert(62,  [false,false,true,true,true,true,true,false]);
+	rules.insert(90,  [false,true,false,true,true,false,true,false]);
+	rules.insert(94,  [false,true,false,true,true,true,true,false]);
+	rules.insert(102, [false,true,true,false,false,true,true,false]);
+	rules.insert(110, [false,true,true,false,true,true,true,false]);
+	rules.insert(122, [false,true,true,true,true,false,true,false]);
+	rules.insert(126, [false,true,true,true,true,true,true,false]);
+	rules.insert(150, [true,false,false,true,false,true,true,false]);
+	rules.insert(182, [true,false,true,true,false,true,true,false]);
+	rules.insert(188, [true,false,true,true,true,true,false,false]);
+	rules.insert(190, [true,false,true,true,true,true,true,false]);
+	rules.insert(220, [true,true,false,true,true,true,false,false]);
+	rules.insert(222, [true,true,false,true,true,true,true,false]);
+	rules.insert(250, [true,true,true,true,true,false,true,false]);
+	return rules;
+}
+
+fn read_width(error: bool) -> u8{
+	if error {
+		println!("Invalid entry. Please specify a valid board with (1-255)");
+	} else {
+		println!("Please specify a board witdth");
+	}
+	let mut width = String::new();
+	io::stdin().read_line(&mut width)
+			   .expect("Failed to read line");
+
+	match width.trim().parse::<u8>() {
+ 		Ok(n) => return n,	
+ 		Err(_) => return read_width(true),
+ 	}	
+}
+fn select_rule(error: bool) -> u8{
+	if error {
+		println!("Invalid entry. Please select a valid rule.");
+	} else {
+		println!("Please select a rule.");
+	}
+	let mut rule = String::new();
+	io::stdin().read_line(&mut rule)
+			   .expect("Failed to read line");
+	match rule.trim().parse::<u8>() {
+ 		Ok(n) => return n,	
+ 		Err(_) => return select_rule(true),
+ 	}
+
+}
+
+fn read_generations(error: bool) -> u32
+{
+	if error {
+		println!("Invalid entry. Please specify how many generations to run");
+	} else {
+		println!("Please specify how many generations to run");
+	}
+	let mut gen = String::new();
+
+	io::stdin().read_line(&mut gen)
+			   .expect("Failed to read line");
+	match gen.trim().parse::<u32>() {
+ 		Ok(n) => return n,	
+ 		Err(_) => read_generations(true),
+  	}
+}
